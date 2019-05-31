@@ -26,11 +26,11 @@ type LineReader interface {
 	ReadBytes(delim byte) (line []byte, err error)
 }
 
-func get_value(data map[string]interface{}, keyparts []string) string {
-	if len(keyparts) > 1 {
-		subdata, _ := data[keyparts[0]].(map[string]interface{})
-		return get_value(subdata, keyparts[1:])
-	} else if v, ok := data[keyparts[0]]; ok {
+func getValue(data map[string]interface{}, keys []string) string {
+	if len(keys) > 1 {
+		subdata, _ := data[keys[0]].(map[string]interface{})
+		return getValue(subdata, keys[1:])
+	} else if v, ok := data[keys[0]]; ok {
 		switch v.(type) {
 		case nil:
 			return ""
@@ -52,16 +52,16 @@ func get_value(data map[string]interface{}, keyparts []string) string {
 func json2csv(r LineReader, w *csv.Writer, keys []string, printHeader bool) (int, error) {
 	var line []byte
 	var err error
-	line_count := 0
+	lineCount := 0
 
-	var expanded_keys [][]string
+	var expandedKeys [][]string
 	for _, key := range keys {
-		expanded_keys = append(expanded_keys, strings.Split(key, "."))
+		expandedKeys = append(expandedKeys, strings.Split(key, "."))
 	}
 
 	for {
 		if err == io.EOF {
-			return line_count, nil
+			return lineCount, nil
 		}
 		line, err = r.ReadBytes('\n')
 		if err != nil {
@@ -69,7 +69,7 @@ func json2csv(r LineReader, w *csv.Writer, keys []string, printHeader bool) (int
 				return 0, fmt.Errorf("input ERROR: %s", err)
 			}
 		}
-		line_count++
+		lineCount++
 		if len(line) == 0 {
 			continue
 		}
@@ -87,15 +87,15 @@ func json2csv(r LineReader, w *csv.Writer, keys []string, printHeader bool) (int
 		}
 
 		var record []string
-		for _, expanded_key := range expanded_keys {
-			record = append(record, get_value(data, expanded_key))
+		for _, key := range expandedKeys {
+			record = append(record, getValue(data, key))
 		}
 
 		w.Write(record)
 		w.Flush()
 	}
 
-	return line_count, nil
+	return lineCount, nil
 }
 
 func Do(inputFile, outputFile, outputDelim string, keys []string, printHeader bool) (int, error) {

@@ -20,8 +20,10 @@ func main() {
 	outputDelim := flag.String("d", ",", "delimiter used for output values")
 	showVersion := flag.Bool("version", false, "print version string")
 	printHeader := flag.Bool("H", false, "prints header to output")
+
 	keys := json2csv.StringArray{}
 	flag.Var(&keys, "k", "fields to output")
+
 	flag.Parse()
 
 	if *showVersion {
