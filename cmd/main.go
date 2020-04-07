@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/qinhao/json2csv"
+	"github.com/haotrr/json2csv"
 )
 
 var Version = "1.0.0"

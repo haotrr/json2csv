@@ -1,4 +1,4 @@
-module github.com/qinhao/json2csv
+module github.com/haotrr/json2csv
 
 go 1.12
 

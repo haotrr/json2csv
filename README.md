@@ -7,12 +7,12 @@ Converts a stream of newline separated json data to csv format. Forks from [jehi
 Installation
 ============
 
-pre-built binaries are available under [releases](https://github.com/qinhao/json2csv/releases).
+pre-built binaries are available under [releases](https://github.com/haotrr/json2csv/releases).
 
 If you have a working golang install, you can use `go get`.
 
 ```bash
-go get github.com/qinhao/json2csv/cmd
+go get github.com/haotrr/json2csv/cmd
 mv $GOPATH/bin/cmd $GOPATH/bin/json2csv
 ```
 
