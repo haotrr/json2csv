@@ -60,5 +60,5 @@ cat input.json | json2csv -k user.name,remote_ip > output.csv
 Package
 =======
 ```go
-func Do(inputFile, outputFile, outputDelim string, keys []string, printHeader bool) (int, error)
+func Do(inputFile, outputFile, outputDelim string, allKeys boo, keys []string, printHeader bool) (int, error)
 ```
