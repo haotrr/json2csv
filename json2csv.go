@@ -7,9 +7,11 @@ import (
 	"io"
 	"math"
 	"os"
+	"sort"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/astaxie/flatmap"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -18,12 +20,28 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 const (
 	Stdin  = ""
 	Stdout = ""
+)
 
+const (
 	defaultDelim = ","
 )
 
 type LineReader interface {
 	ReadBytes(delim byte) (line []byte, err error)
+}
+
+func flattenKeys(data map[string]interface{}) ([]string, error) {
+	fm, err := flatmap.Flatten(data)
+	if err != nil {
+		return nil, err
+	}
+	var ks []string
+	for k := range fm {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+
+	return ks, nil
 }
 
 func getValue(data map[string]interface{}, keys []string) string {
@@ -49,10 +67,12 @@ func getValue(data map[string]interface{}, keys []string) string {
 	return ""
 }
 
-func json2csv(r LineReader, w *csv.Writer, keys []string, printHeader bool) (int, error) {
-	var line []byte
-	var err error
-	lineCount := 0
+func json2csv(r LineReader, w *csv.Writer, allKeys bool, keys []string, printHeader bool) (int, error) {
+	var (
+		line      []byte
+		err       error
+		lineCount int
+	)
 
 	var expandedKeys [][]string
 	for _, key := range keys {
@@ -68,22 +88,36 @@ func json2csv(r LineReader, w *csv.Writer, keys []string, printHeader bool) (int
 			if err != io.EOF {
 				return 0, fmt.Errorf("input ERROR: %s", err)
 			}
+
+			break
 		}
 		lineCount++
 		if len(line) == 0 {
 			continue
 		}
 
-		if printHeader {
-			w.Write(keys)
-			w.Flush()
-			printHeader = false
-		}
-
 		var data map[string]interface{}
 		err = json.Unmarshal(line, &data)
 		if err != nil {
 			continue
+		}
+
+		if allKeys {
+			flattened, err := flattenKeys(data)
+			if err != nil {
+				return 0, err
+			}
+			keys = flattened
+			for _, key := range keys {
+				expandedKeys = append(expandedKeys, strings.Split(key, "."))
+			}
+			allKeys = false
+		}
+
+		if printHeader {
+			w.Write(keys)
+			w.Flush()
+			printHeader = false
 		}
 
 		var record []string
@@ -98,7 +132,7 @@ func json2csv(r LineReader, w *csv.Writer, keys []string, printHeader bool) (int
 	return lineCount, nil
 }
 
-func Do(inputFile, outputFile, outputDelim string, keys []string, printHeader bool) (int, error) {
+func Do(inputFile, outputFile, outputDelim string, allKeys bool, keys []string, printHeader bool) (int, error) {
 	var reader *bufio.Reader
 	var writer *csv.Writer
 	if inputFile == Stdin {
@@ -128,5 +162,5 @@ func Do(inputFile, outputFile, outputDelim string, keys []string, printHeader bo
 	delim, _ := utf8.DecodeRuneInString(outputDelim)
 	writer.Comma = delim
 
-	return json2csv(reader, writer, keys, printHeader)
+	return json2csv(reader, writer, allKeys, keys, printHeader)
 }

@@ -1,3 +1,5 @@
+github.com/astaxie/flatmap v0.0.0-20160505145528-c0e84c00d8d5 h1:loE17hiICJxVzIqSJ72rwyfGglkrz6j3gpc0u9lXAAU=
+github.com/astaxie/flatmap v0.0.0-20160505145528-c0e84c00d8d5/go.mod h1:egvq5QKnBtm64ZaBeOZ9RuZGDq7yXGVKGQN0Mkn2rs4=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 h1:DDGfHa7BWjL4YnC6+E63dPcxHo2sUxDIu8g3QgEJdRY=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dRnpXw/yCqJaO+ZrUyxD+3VXMFFr56k5XYrpB4=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=

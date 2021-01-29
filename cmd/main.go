@@ -10,16 +10,15 @@ import (
 var Version = "1.0.0"
 var BuildTime = ""
 
-type LineReader interface {
-	ReadBytes(delim byte) (line []byte, err error)
-}
-
 func main() {
-	inputFile := flag.String("i", json2csv.Stdin, "/path/to/input.json (optional; default is stdin)")
-	outputFile := flag.String("o", json2csv.Stdout, "/path/to/output.csv (optional; default is stdout)")
-	outputDelim := flag.String("d", ",", "delimiter used for output values")
-	showVersion := flag.Bool("version", false, "print version string")
-	printHeader := flag.Bool("H", false, "prints header to output")
+	var (
+		inputFile   = flag.String("i", json2csv.Stdin, "/path/to/input.json (optional; default is stdin)")
+		outputFile  = flag.String("o", json2csv.Stdout, "/path/to/output.csv (optional; default is stdout)")
+		outputDelim = flag.String("d", ",", "delimiter used for output values")
+		showVersion = flag.Bool("version", false, "print version string")
+		printHeader = flag.Bool("H", false, "prints header to output")
+		allKeys     = flag.Bool("a", false, "output all keys")
+	)
 
 	keys := json2csv.StringArray{}
 	flag.Var(&keys, "k", "fields to output")
@@ -31,11 +30,8 @@ func main() {
 		return
 	}
 
-	n, err := json2csv.Do(*inputFile, *outputFile, *outputDelim, keys, *printHeader)
+	_, err := json2csv.Do(*inputFile, *outputFile, *outputDelim, *allKeys, keys, *printHeader)
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	fmt.Println()
-	fmt.Println(n, "line(s) data handled.")
 }
