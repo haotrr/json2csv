@@ -3,6 +3,7 @@ package json2csv
 import (
 	"bufio"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -12,10 +13,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/astaxie/flatmap"
-	jsoniter "github.com/json-iterator/go"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	Stdin  = ""
@@ -52,6 +50,8 @@ func getValue(data map[string]interface{}, keys []string) string {
 		switch v.(type) {
 		case nil:
 			return ""
+		case string:
+			return v.(string)
 		case float64:
 			f, _ := v.(float64)
 			if math.Mod(f, 1.0) == 0.0 {
@@ -59,8 +59,11 @@ func getValue(data map[string]interface{}, keys []string) string {
 			} else {
 				return fmt.Sprintf("%f", f)
 			}
+		case interface{}:
+			raw, _ := json.Marshal(v)
+			return string(raw)
 		default:
-			return fmt.Sprintf("%+v", v)
+			return fmt.Sprintf("%v", v)
 		}
 	}
 
