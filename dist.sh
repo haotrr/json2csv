@@ -8,6 +8,8 @@ BUILD_TIME=`date +%FT%T%z`
 DIST=dist
 OUTPUT=json2csv
 
+# Optimization flags for better performance and smaller binary size
+BUILD_FLAGS="-ldflags=-s -w -trimpath"
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "working dir $DIR"
@@ -23,10 +25,11 @@ if [[ ! -d $DIST ]]; then
 fi
 
 for os in linux darwin; do
-    echo "... building v$VERSION for $os/$arch"
+    echo "... building v$VERSION for $os/$arch with optimizations"
     BUILD=$(mktemp -d 2>/dev/null || mktemp -d -t $OUTPUT)
     TARGET="$OUTPUT-$VERSION.$os-$arch.$goversion"
-    GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -o $OUTPUT -ldflags "-X main.Version=$VERSION -X main.BuildTime=$BUILD_TIME" ./cmd/...
+    # Use optimized build flags for smaller, faster binaries
+    GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build $BUILD_FLAGS -o $OUTPUT -ldflags "-s -w -X main.Version=$VERSION -X main.BuildTime=$BUILD_TIME" ./cmd/...
     mkdir -p $BUILD/$TARGET
     mv $OUTPUT $BUILD/$TARGET/$OUTPUT
     pushd $BUILD >/dev/null
@@ -35,6 +38,6 @@ for os in linux darwin; do
         echo "... WARNING overwriting $DIST/$TARGET.tar.gz"
     fi
     mv $TARGET.tar.gz $DIR/$DIST
-    echo "... built $DIST/$TARGET.tar.gz"
+    echo "... built optimized $DIST/$TARGET.tar.gz"
     popd >/dev/null
 done
