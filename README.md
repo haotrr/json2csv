@@ -7,6 +7,12 @@ Converts a stream of newline separated json data to csv format. Forks from [jehi
 Installation
 ============
 
+This tool requires **Go 1.24 or later**. Verify your Go installation with:
+
+```bash
+go version
+```
+
 pre-built binaries are available under [releases](https://github.com/haotrr/json2csv/releases).
 
 If you have a working golang install, you can use `go get`.
