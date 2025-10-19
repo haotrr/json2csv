@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # build binary distributions for linux/amd64 and darwin/amd64
-set -e 
+set -e
 
 VERSION=`cat VERSION`
 BUILD_TIME=`date +%FT%T%z`
 DIST=dist
 OUTPUT=json2csv
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIR="./"
 echo "working dir $DIR"
 
 echo "... running tests"
@@ -29,12 +29,10 @@ for os in linux darwin; do
     GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -o $OUTPUT -ldflags "-s -w -X main.Version=$VERSION -X main.BuildTime=$BUILD_TIME" ./cmd/...
     mkdir -p $BUILD/$TARGET
     mv $OUTPUT $BUILD/$TARGET/$OUTPUT
-    pushd $BUILD >/dev/null
-    tar czvf $TARGET.tar.gz $TARGET
-    if [ -e $DIR/$DIST/$TARGET.tar.gz ]; then
+    tar czvf $DIST/$TARGET.tar.gz -C $BUILD $TARGET
+    if [ -e $DIST/$TARGET.tar.gz ]; then
         echo "... WARNING overwriting $DIST/$TARGET.tar.gz"
     fi
-    mv $TARGET.tar.gz $DIR/$DIST
     echo "... built optimized $DIST/$TARGET.tar.gz"
-    popd >/dev/null
+    rm -rf $BUILD
 done
