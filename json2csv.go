@@ -12,8 +12,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/astaxie/flatmap"
-)
+	)
 
 const (
 	Stdin  = ""
@@ -50,12 +49,36 @@ func (kc *KeyCache) GetExpandedKey(key string) []string {
 	return expanded
 }
 
+// flattenKeys performs custom map flattening without external dependencies
+// Optimized for performance by pre-allocating maps and minimizing allocations
 func flattenKeys(data map[string]interface{}) ([]string, error) {
-	fm, err := flatmap.Flatten(data)
-	if err != nil {
-		return nil, err
+	fm := make(map[string]interface{}, len(data)*2) // Pre-allocate with estimated capacity
+
+	// Custom flattening implementation
+	var flatten func(map[string]interface{}, string)
+	flatten = func(m map[string]interface{}, prefix string) {
+		for k, v := range m {
+			var key string
+			if prefix == "" {
+				key = k
+			} else {
+				key = prefix + "." + k
+			}
+
+			switch v := v.(type) {
+			case map[string]interface{}:
+				// Recursively flatten nested maps
+				flatten(v, key)
+			default:
+				// Add leaf values to flattened map
+				fm[key] = v
+			}
+		}
 	}
-	// Pre-allocate slice with known capacity
+
+	flatten(data, "")
+
+	// Extract and sort keys
 	ks := make([]string, 0, len(fm))
 	for k := range fm {
 		ks = append(ks, k)
